@@ -1,10 +1,48 @@
 <%- include partials/header.ejs %>
 <%- include partials/main_nav.ejs %>
 
-<main>
+<main class="container mt-4">
 
-<h1> <%= title %> </h1>
+  <h1><%= title %></h1>
+
+  <a class="btn btn-success mb-3" href="/add">
+    <i class="fa-solid fa-plus"></i> Add Assignment
+  </a>
+
+  <% if (assignments && assignments.length > 0) { %>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Assignment</th>
+          <th>Course</th>
+          <th>Due Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% assignments.forEach(a => { %>
+          <tr>
+            <td><%= a.name %></td>
+            <td><%= a.course %></td>
+            <td><%= new Date(a.dueDate).toDateString() %></td>
+            <td>
+              <a href="/edit/<%= a._id %>" class="btn btn-warning btn-sm">
+                <i class="fa-solid fa-wrench"></i> Edit
+              </a>
+              <a href="/delete/<%= a._id %>"
+                class="btn btn-danger btn-sm delete-btn">
+               <i class="fa-solid fa-trash"></i> Delete
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p>No assignments yet. Click "Add Assignment" to create one.</p>
+  <% } %>
 
 </main>
+
 <%- include partials/bottom_nav.ejs %>
 <%- include partials/footer.ejs %>

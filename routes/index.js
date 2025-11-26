@@ -1,32 +1,80 @@
 var express = require('express');
 var router = express.Router();
+const Assignment = require('../models/assignment');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { 
-    title: 'Home Page' 
+router.get('/', async function (req, res) {
+  try {
+    const assignments = await Assignment.find().lean();
+
+    res.render('index', {
+      title: 'Assignment Tracker',
+      assignments,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+router.get('/add', function (req, res) {
+  res.render('add', {
+    title: 'Add Assignment',
   });
 });
 
-/* GET Assignments page. */
-router.get('/assignments', function(req, res, next) {
-  res.render('index', { 
-    title: 'Assignments Catalog' 
-  });
+router.post('/add', async function (req, res) {
+  try {
+    await Assignment.create({
+      name: req.body.name,
+      course: req.body.course,
+      dueDate: req.body.dueDate,
+    });
+
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error saving assignment');
+  }
 });
 
-/* GET Add page. */
-router.get('/add', function(req, res, next) {
-  res.render('index', { 
-    title: 'Add Assignment' 
-  });
+router.get('/edit/:id', async function (req, res) {
+  try {
+    const assignment = await Assignment.findById(req.params.id).lean();
+    if (!assignment) return res.status(404).send('Assignment not found');
+
+    res.render('edit', {
+      title: 'Edit Assignment',
+      assignment,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading assignment');
+  }
 });
 
-/* GET Edit page. */
-router.get('/edit', function(req, res, next) {
-  res.render('index', { 
-    title: 'Edit Assignment' 
-  });
+router.post('/edit/:id', async function (req, res) {
+  try {
+    await Assignment.findByIdAndUpdate(req.params.id, {
+      name: req.body.name,
+      course: req.body.course,
+      dueDate: req.body.dueDate,
+    });
+
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating assignment');
+  }
+});
+
+router.get('/delete/:id', async function (req, res) {
+  try {
+    await Assignment.findByIdAndDelete(req.params.id);
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error deleting assignment');
+  }
 });
 
 module.exports = router;
